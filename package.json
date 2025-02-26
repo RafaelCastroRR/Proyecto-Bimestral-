@@ -1,0 +1,24 @@
+{
+    "name": "proyecto-bimestral-",
+    "version": "1.0.0",
+    "description": "Este proyecto se centra en el desarrollo de una API web implementada en NodeJS",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2",
+        "mongoose": "^8.10.2",
+        "morgan": "^1.10.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.0"
+    }
+}
