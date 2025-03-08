@@ -1,3 +1,5 @@
+// src/auth/models/userModel.js
+
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -7,4 +9,6 @@ const userSchema = new mongoose.Schema({
     role: { type: String, default: 'CLIENT' },
 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+module.exports = User;

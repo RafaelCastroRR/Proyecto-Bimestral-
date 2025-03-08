@@ -1,5 +1,8 @@
-import { config } from "dotenv";
-import { initServer } from './configs/server.js';
+// index.js
 
-config();
+const dotenv = require('dotenv'); 
+const { initServer } = require('./configs/server.js');
+
+dotenv.config();  
+
 initServer();
