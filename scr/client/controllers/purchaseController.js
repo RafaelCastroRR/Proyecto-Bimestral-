@@ -1,41 +1,39 @@
 const Order = require('../models/orderModel');
 const Cart = require('../models/cartModel');
-const Product = require('../models/productModel'); // Asegúrate de que el modelo del producto esté importado
 
-// Realizar compra
+// Función para limpiar el carrito después de la compra
+const clearCartAfterPurchase = async (userId) => {
+    await Cart.findOneAndUpdate({ userId }, { items: [] });
+};
+
+
 const makePurchase = async (req, res) => {
     try {
+        // Verificar si el usuario tiene un carrito
         const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId');
-        
-        // Verificar si el carrito existe y si tiene productos
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'El carrito está vacío' });
         }
 
-        // Calcular el totalAmount usando el precio del producto
-        const totalAmount = cart.items.reduce((acc, item) => {
-            return acc + item.quantity * item.productId.price; // Asegúrate de acceder correctamente al precio del producto
-        }, 0);
+        // Calcular totalAmount
+        const totalAmount = cart.items.reduce((acc, item) => acc + item.quantity * item.productId.price, 0);
 
-        // Crear la orden con los detalles del carrito
+        // Crear la orden
         const order = new Order({
             userId: req.user.id,
             items: cart.items.map(item => ({
-                productId: item.productId._id,  // Guardar solo el ID del producto
+                productId: item.productId._id,
                 quantity: item.quantity,
-                price: item.productId.price // Guardar precio de cada producto
+                price: item.productId.price
             })),
             totalAmount,
-            status: 'pendiente', // Puedes cambiar el estado si es necesario
+            status: 'pendiente',
         });
 
         await order.save();
+        await clearCartAfterPurchase(req.user.id);
 
-        // Limpiar carrito después de realizar la compra
-        cart.items = [];
-        await cart.save();
-
-        res.status(201).json(order);  // Enviar la orden como respuesta
+        res.status(201).json(order);
     } catch (error) {
         res.status(500).json({ message: "Error al realizar la compra", error });
     }

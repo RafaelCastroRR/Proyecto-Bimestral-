@@ -33,39 +33,44 @@ const getCart = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener el carrito', error });
     }
 };
-
-// Agregar un producto al carrito
 const addToCart = async (req, res) => {
-    const { userId, productId, quantity } = req.body; // Usamos el userId del cuerpo de la solicitud
+    const { userId, productId, quantity } = req.body;
     try {
-        // Buscar el carrito del usuario
+        // Buscar el producto en la base de datos para obtener su precio
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
+
         let cart = await Cart.findOne({ userId });
 
-        // Si no se encuentra el carrito, crear uno nuevo
         if (!cart) {
+            // Si no existe el carrito, lo creamos con el producto y su precio
             cart = new Cart({
                 userId,
-                items: [{ productId, quantity }],
+                items: [{ productId, quantity, price: product.price }] // Se asigna correctamente el precio
             });
         } else {
-            // Si el carrito ya existe, buscamos si el producto ya está en el carrito
+            // Buscar si el producto ya está en el carrito
             const existingProductIndex = cart.items.findIndex(item => item.productId.toString() === productId);
 
             if (existingProductIndex >= 0) {
-                // Si el producto ya está en el carrito, actualizamos la cantidad
+                // Si ya existe, actualizamos la cantidad
                 cart.items[existingProductIndex].quantity += quantity;
             } else {
-                // Si el producto no está en el carrito, lo agregamos
-                cart.items.push({ productId, quantity });
+                // Si no existe, lo agregamos asegurando el precio
+                cart.items.push({ productId, quantity, price: product.price });
             }
         }
 
-        // Guardamos el carrito actualizado
         await cart.save();
         res.status(200).json({ message: 'Producto agregado al carrito', cart });
     } catch (error) {
         res.status(500).json({ message: 'Error al agregar al carrito', error });
     }
 };
+
+
+
 
 module.exports = { createCart, addToCart, getCart };
